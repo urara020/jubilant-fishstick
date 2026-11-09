@@ -1,0 +1,26 @@
+{
+  "usualAlarm": "06:42",
+  "arriveBy": "09:00",
+  "usualMinutes": 52,
+  "thresholdMinutes": 10,
+  "maxShiftMinutes": 40,
+  "bucketMinutes": 10,
+  "alarmLabelPrefix": "遅延",
+  "origin": "中野区本町",
+  "destination": "千代田区大手町",
+  "trains": [
+    { "name": "東西線", "operator": "odpt.Operator:TokyoMetro", "railway": "odpt.Railway:TokyoMetro.Tozai" },
+    { "name": "丸ノ内線", "operator": "odpt.Operator:TokyoMetro", "railway": "odpt.Railway:TokyoMetro.Marunouchi" },
+    { "name": "都営大江戸線", "operator": "odpt.Operator:Toei", "railway": "odpt.Railway:Toei.Oedo", "endpoint": "public" }
+  ],
+  "roads": [],
+  "trainDefaults": { "delayMinutes": 15, "suspendedMinutes": 30 },
+  "weather": {
+    "lat": 35.6978,
+    "lon": 139.6708,
+    "hours": [7, 8, 9],
+    "rainThresholdMm": 1,
+    "rainExtraMinutes": 3,
+    "snowExtraMinutes": 10
+  }
+}
