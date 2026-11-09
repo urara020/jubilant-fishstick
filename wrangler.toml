@@ -4,3 +4,5 @@ compatibility_date = "2026-10-01"
 
 # CONFIG・ACCESS_KEY・ODPT_TOKEN・GOOGLE_MAPS_KEY は
 # Cloudflare のダッシュボードで「変数とシークレット」に設定します（README 参照）。
+# keep_vars: 自動デプロイのたびにダッシュボードで設定した変数が消えないようにする
+keep_vars = true
