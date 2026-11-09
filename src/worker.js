@@ -62,7 +62,7 @@ export async function check(config, env, { now, fetchImpl }) {
   let extra = 0;
   let suspended = false;
 
-  const trains = await checkTrains(config, env, fetchImpl).catch((e) => {
+  const trains = await checkTrains(config, env, fetchImpl, (msg) => errors.push('電車: ' + msg)).catch((e) => {
     errors.push('電車: ' + e.message);
     return [];
   });
@@ -146,7 +146,7 @@ export function decide(config, { extra, reasons, suspended, errors, now }) {
 
 // ---------- 電車（公共交通オープンデータ） ----------
 
-export async function checkTrains(config, env, fetchImpl) {
+export async function checkTrains(config, env, fetchImpl, onError = (m) => { throw new Error(m); }) {
   if (!config.trains.length) return [];
   // 同じ API・同じ事業者はまとめて 1 回で取得
   const groups = new Map();
@@ -157,15 +157,26 @@ export async function checkTrains(config, env, fetchImpl) {
     groups.get(k).lines.push(line);
   }
   const out = [];
+  // 事業者ごとに取得し、1つが失敗してもほかの事業者は調べる
   for (const g of groups.values()) {
+    const names = g.lines.map((l) => l.name).join('・');
     const q = new URLSearchParams({ 'odpt:operator': g.operator });
     if (!g.base.includes('api-public')) {
-      if (!env.ODPT_TOKEN) throw new Error('ODPT_TOKEN が未設定です');
+      if (!env.ODPT_TOKEN) {
+        onError(`ODPT_TOKEN が未設定のため ${names} を確認できません`);
+        continue;
+      }
       q.set('acl:consumerKey', env.ODPT_TOKEN);
     }
-    const res = await fetchImpl(`${g.base}/odpt:TrainInformation?${q}`);
-    if (!res.ok) throw new Error(`${g.operator} の取得に失敗（${res.status}）`);
-    const items = await res.json();
+    let items;
+    try {
+      const res = await fetchImpl(`${g.base}/odpt:TrainInformation?${q}`);
+      if (!res.ok) throw new Error(`${names} の取得に失敗（${res.status}）`);
+      items = await res.json();
+    } catch (e) {
+      onError(e.message);
+      continue;
+    }
     for (const line of g.lines) {
       const info = items.find((it) => it['odpt:railway'] === line.railway)
         || items.find((it) => !it['odpt:railway']); // 事業者全体のお知らせ

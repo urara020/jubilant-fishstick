@@ -128,3 +128,12 @@ test('ACCESS_KEY 未設定と不一致を区別し、前後の空白は無視す
   const ok = await worker.fetch(new Request('https://x.example/presets?key=abc'), { ACCESS_KEY: ' abc\n', CONFIG: cfg });
   assert.equal(ok.status, 200);
 });
+
+test('東京メトロが取れなくても都営は調べる', async () => {
+  const f = fakeFetch([['Toei', [{ 'odpt:railway': 'odpt.Railway:Toei.Oedo', 'odpt:trainInformationStatus': { ja: '遅延' }, 'odpt:trainInformationText': { ja: '約12分の遅れが出ています。' } }]], ['open-meteo', weatherBody(0)]]);
+  const r = await check(config, {}, { now, fetchImpl: f });
+  assert.equal(r.extraMinutes, 12);
+  assert.equal(r.status, 'delay');
+  assert.equal(r.errors.length, 1);
+  assert.match(r.errors[0], /東西線・丸ノ内線/);
+});
