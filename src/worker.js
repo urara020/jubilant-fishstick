@@ -187,10 +187,11 @@ export async function checkTrains(config, env, fetchImpl, onError = (m) => { thr
 }
 
 export function interpretTrainInfo(line, info, defaults) {
-  const status = textOf(info && info['odpt:trainInformationStatus']);
-  const text = textOf(info && info['odpt:trainInformationText']) || '情報なし';
+  const status = toHalfWidth(textOf(info && info['odpt:trainInformationStatus']));
+  const text = toHalfWidth(textOf(info && info['odpt:trainInformationText'])) || '情報なし';
   const all = status + ' ' + text;
-  const normal = !status && /平常|通常|遅れはありません/.test(text);
+  // 例:「平常どおり運転しています」「現在、15分以上の遅延はありません」
+  const normal = !status && /平常|通常|(?:遅延|遅れ)は(?:ありません|ございません)/.test(text);
   if (!info || normal) return { name: line.name, text: '平常運転', extraMinutes: 0, suspended: false };
 
   const suspended = /見合わせ|運休|運転を中止/.test(all);
@@ -333,6 +334,9 @@ function jstMinutes(date) {
 function formatJst(date) {
   const d = new Date(date.getTime() + JST_OFFSET_MIN * 60000);
   return d.toISOString().slice(0, 16).replace('T', ' ');
+}
+function toHalfWidth(s) {
+  return s.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 }
 function textOf(v) {
   if (!v) return '';

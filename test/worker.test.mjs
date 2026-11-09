@@ -138,3 +138,10 @@ test('東京メトロが取れなくても都営は調べる', async () => {
   assert.equal(r.errors.length, 1);
   assert.match(r.errors[0], /東西線・丸ノ内線/);
 });
+
+test('「１５分以上の遅延はありません」は平常（実データの文面）', () => {
+  const t = interpretTrainInfo({ name: '都営大江戸線' }, { 'odpt:trainInformationText': { ja: '現在、１５分以上の遅延はありません。' } }, defaults);
+  assert.equal(t.extraMinutes, 0);
+  const t2 = interpretTrainInfo({ name: 'X' }, { 'odpt:trainInformationStatus': { ja: '遅延' }, 'odpt:trainInformationText': { ja: '約２０分の遅れが出ています。' } }, defaults);
+  assert.equal(t2.extraMinutes, 20);
+});
