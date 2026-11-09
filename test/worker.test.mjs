@@ -106,7 +106,8 @@ test('データが取れなくても止まらず errors に入れる', async () 
   const f = fakeFetch([['open-meteo', weatherBody(0)]]);
   const r = await check(config, {}, { now, fetchImpl: f });
   assert.equal(r.status, 'normal');
-  assert.equal(r.errors.length, 1);
+  // 東京メトロ（トークン未設定）と都営（取得失敗）の2件
+  assert.equal(r.errors.length, 2);
 });
 
 test('合言葉が違えば 401', async () => {
