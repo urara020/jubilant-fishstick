@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "echo \"ビルド不要（src/worker.js をそのまま使います）\"",
+    "deploy": "wrangler deploy",
     "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.158.0"
   }
 }
