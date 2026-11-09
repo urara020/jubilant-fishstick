@@ -24,8 +24,12 @@ export default {
     if (url.pathname === '/' || url.pathname === '/health') {
       return json({ ok: true, name: 'commute-delay-alarm' });
     }
-    if (!env.ACCESS_KEY || url.searchParams.get('key') !== env.ACCESS_KEY) {
-      return json({ error: 'unauthorized' }, 401);
+    const expected = String(env.ACCESS_KEY || '').trim();
+    if (!expected) {
+      return json({ error: 'unauthorized', reason: 'サーバーに ACCESS_KEY が設定されていません（ビルド用ではなく、Worker 本体の「変数とシークレット」に入れてください）' }, 401);
+    }
+    if (String(url.searchParams.get('key') || '').trim() !== expected) {
+      return json({ error: 'unauthorized', reason: '合言葉が一致しません' }, 401);
     }
     let config;
     try {

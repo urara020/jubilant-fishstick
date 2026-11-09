@@ -120,3 +120,11 @@ test('simulate で遅延を試せる', async () => {
   assert.equal(body.status, 'delay');
   assert.equal(body.extraMinutes, 20);
 });
+
+test('ACCESS_KEY 未設定と不一致を区別し、前後の空白は無視する', async () => {
+  const cfg = readFileSync(new URL('../config.example.json', import.meta.url), 'utf8');
+  const missing = await (await worker.fetch(new Request('https://x.example/presets?key=a'), { CONFIG: cfg })).json();
+  assert.match(missing.reason, /設定されていません/);
+  const ok = await worker.fetch(new Request('https://x.example/presets?key=abc'), { ACCESS_KEY: ' abc\n', CONFIG: cfg });
+  assert.equal(ok.status, 200);
+});
